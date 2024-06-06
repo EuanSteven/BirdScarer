@@ -28,7 +28,6 @@ print("======================================== Bird Scarer ====================
 
 # Built-in Modules
 import time
-from time import sleep
 
 # Third Party Modules
 import numpy as np
@@ -42,26 +41,16 @@ def setServoAngle(angle_x, angle_y, servo_x, servo_y):
     servo_x.value = angle_x / 180
     servo_y.value = angle_y / 180
 
-    sleep(0.3)
-
-def motionDetection(motion):
-    pir = MotionSensor(4)
-    motion = False
-
-    while motion is False:
-        pir.wait_for_motion()
-        motion = True
-        print("Motion Detected")
-
-    return motion
+def motionDetection(pir):
+    pir.wait_for_motion()
+    return True
 
 def cameraCapture(camera):
     image_array = PiCamera2.array(camera, camera.sensor_mode)
 
     camera.capture_into(image_array)
 
-    image_data = image_array.array
-    image_data = image_data / 255.0
+    image_data = image_array.array / 255.0
     image_data = np.expand_dims(image_data, 0)
 
     return image_data
@@ -103,6 +92,8 @@ def firingSystem():
 def main():
     startTime = time.time()
 
+    pir = MotionSensor(4)
+
     motion = False
     birdCoordinates = []
 
@@ -115,24 +106,26 @@ def main():
     
     model = load_model('./model/bird_model.h5')
     
-    while motion is False:
-        motionDetection(motion)
-        print("Motion Detected at " + str(time.time()) + " seconds")
-        
-        image_data = cameraCapture(camera)
-        print("Image Captured at " + str(time.time()) + " seconds")
-        
-        birdCoordinates = birdDetection(image_data, model)
-        print("Bird Detected at " + str(time.time()) + " seconds")
-        
-        aimingSystem(birdCoordinates, servo_x, servo_y)
-        print("Aiming System Activated at " + str(time.time()) + " seconds")
-        
-        firingSystem()
-        print("Firing System Activated at " + str(time.time()) + " seconds")
+    while True:
+            motion = motionDetection(pir)
+            if motion:
+                print("Motion Detected at " + str(time.time()) + " seconds")
+            
+                image_data = cameraCapture(camera)
+                print("Image Captured at " + str(time.time()) + " seconds")
+                
+                birdCoordinates = birdDetection(image_data, model)
+                print("Bird Detected at " + str(time.time()) + " seconds")
+                
+                aimingSystem(birdCoordinates, servo_x, servo_y)
+                print("Aiming System Activated at " + str(time.time()) + " seconds")
+                
+                firingSystem()
+                print("Firing System Activated at " + str(time.time()) + " seconds")
 
-    endTime = time.time()
-    print("\n [OK] Bird Scarer - Elapsed Time : " + str(endTime - startTime) + " seconds")
+                endTime = time.time()
+                print("\n [OK] Bird Scarer - Elapsed Time : " + str(endTime - startTime) + " seconds")
+                break
 
 if __name__ == "__main__":
     main()
