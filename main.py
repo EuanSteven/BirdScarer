@@ -38,10 +38,7 @@ from picamera2 import PiCamera2
 
 # ============= Main Program =============
 
-def setServoAngle(angle_x, angle_y):
-    servo_x = Servo(17)
-    servo_y = Servo(18)
-
+def setServoAngle(angle_x, angle_y, servo_x, servo_y):
     servo_x.value = angle_x / 180
     servo_y.value = angle_y / 180
 
@@ -58,12 +55,7 @@ def motionDetection(motion):
 
     return motion
 
-def cameraCapture():
-    camera = PiCamera2()
-
-    camera.resolution = (416,416)
-    camera.sensor_mode = 0
-    
+def cameraCapture(camera):
     image_array = PiCamera2.array(camera, camera.sensor_mode)
 
     camera.capture_into(image_array)
@@ -94,7 +86,7 @@ def birdDetection(image_data, model):
 
     return bird_coordinates
 
-def aimingSystem(birdCoordinates):
+def aimingSystem(birdCoordinates, servo_x, servo_y):
     max_angle_x = 180
     max_angle_y = 180
 
@@ -103,7 +95,7 @@ def aimingSystem(birdCoordinates):
     angle_x = (x / image_width) * max_angle_x
     angle_y = (y / image_height) * max_angle_y
 
-    setServoAngle(angle_x, angle_y)
+    setServoAngle(angle_x, angle_y, servo_x, servo_y)
 
 def firingSystem():
     pass
@@ -113,18 +105,29 @@ def main():
 
     motion = False
     birdCoordinates = []
+
+    camera = PiCamera2()
+    camera.resolution = (416,416)
+    camera.sensor_mode = 0
+
+    servo_x = Servo(17)
+    servo_y = Servo(18)
     
     model = load_model('./model/bird_model.h5')
     
     while motion is False:
         motionDetection(motion)
         print("Motion Detected at " + str(time.time()) + " seconds")
-        image_data = cameraCapture()
+        
+        image_data = cameraCapture(camera)
         print("Image Captured at " + str(time.time()) + " seconds")
+        
         birdCoordinates = birdDetection(image_data, model)
         print("Bird Detected at " + str(time.time()) + " seconds")
-        aimingSystem(birdCoordinates)
+        
+        aimingSystem(birdCoordinates, servo_x, servo_y)
         print("Aiming System Activated at " + str(time.time()) + " seconds")
+        
         firingSystem()
         print("Firing System Activated at " + str(time.time()) + " seconds")
 
