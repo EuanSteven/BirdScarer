@@ -23,6 +23,11 @@
 # Description : Deters Birds from Garden
 # ========================================
 
+# ================ To Do =================
+# - Firing System
+# - Servo Calibration
+# - Bird Detection Model
+
 # ============ Module Imports ============
 print("======================================== Bird Scarer ========================================")
 
@@ -30,7 +35,7 @@ print("======================================== Bird Scarer ====================
 import time
 
 # Third Party Modules
-import numpy as np
+from numpy import array, expand_dims
 from tensorflow.keras.models import load_model
 from gpiozero import MotionSensor, Servo
 from picamera2 import PiCamera2
@@ -51,7 +56,7 @@ def cameraCapture(camera):
     camera.capture_into(image_array)
 
     image_data = image_array.array / 255.0
-    image_data = np.expand_dims(image_data, 0)
+    image_data = expand_dims(image_data, 0)
 
     return image_data
 
@@ -67,7 +72,7 @@ def birdDetection(image_data, model):
         confidence = box[4]
 
         if box[5] == 0 and confidence > 0.5:
-            x1, y1, x2, y2 = box[:4] * np.array([width, height, width, height])
+            x1, y1, x2, y2 = box[:4] * array([width, height, width, height])
             obj_width = int(x2 - x1)
             obj_height = int(y2 - y1)
 
