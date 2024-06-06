@@ -74,9 +74,7 @@ def cameraCapture():
 
     return image_data
 
-def birdDetection(image_data):
-    model = load_model('./model/bird_model.h5')
-
+def birdDetection(image_data, model):
     height = 418
     width = 418
 
@@ -116,12 +114,14 @@ def main():
     motion = False
     birdCoordinates = []
     
+    model = load_model('./model/bird_model.h5')
+    
     while motion is False:
         motionDetection(motion)
         print("Motion Detected at " + str(time.time()) + " seconds")
         image_data = cameraCapture()
         print("Image Captured at " + str(time.time()) + " seconds")
-        birdCoordinates = birdDetection(image_data)
+        birdCoordinates = birdDetection(image_data, model)
         print("Bird Detected at " + str(time.time()) + " seconds")
         aimingSystem(birdCoordinates)
         print("Aiming System Activated at " + str(time.time()) + " seconds")
