@@ -65,7 +65,7 @@ def cameraCapture():
     camera.resolution = (416,416)
     camera.sensor_mode = 0
     
-    image_array = PiCamera2Array(camera, camera.sensor_mode)
+    image_array = PiCamera2.array(camera, camera.sensor_mode)
 
     camera.capture_into(image_array)
 
@@ -118,7 +118,8 @@ def main():
     
     while motion is False:
         motionDetection(motion)
-        birdCoordinates = birdDetection()
+        image_data = cameraCapture()
+        birdCoordinates = birdDetection(image_data)
         aimingSystem(birdCoordinates)
         firingSystem()
 
