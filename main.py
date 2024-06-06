@@ -31,7 +31,6 @@ import time
 from time import sleep
 
 # Third Party Modules
-import cv2
 import numpy as np
 from tensorflow.keras.models import load_model
 from gpiozero import MotionSensor, Servo
@@ -77,12 +76,13 @@ def cameraCapture():
 
 def birdDetection(image_data):
     model = load_model('./model/bird_model.h5')
-    image = cv2.imread('./img/image.jpg')
-    height, width, _ = image.shape                          # what is this underscore doing here?
 
-    predictions = model.predict(image_data)
+    height = 418
+    width = 418
 
     bird_coordinates = []
+
+    predictions = model.predict(image_data)
 
     for box in predictions[0]:
         confidence = box[4]
@@ -118,10 +118,15 @@ def main():
     
     while motion is False:
         motionDetection(motion)
+        print("Motion Detected at " + str(time.time()) + " seconds")
         image_data = cameraCapture()
+        print("Image Captured at " + str(time.time()) + " seconds")
         birdCoordinates = birdDetection(image_data)
+        print("Bird Detected at " + str(time.time()) + " seconds")
         aimingSystem(birdCoordinates)
+        print("Aiming System Activated at " + str(time.time()) + " seconds")
         firingSystem()
+        print("Firing System Activated at " + str(time.time()) + " seconds")
 
     endTime = time.time()
     print("\n [OK] Bird Scarer - Elapsed Time : " + str(endTime - startTime) + " seconds")
