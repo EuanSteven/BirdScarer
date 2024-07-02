@@ -1,5 +1,8 @@
 # BirdScarer
 
+# NOTE - Work In Progress
+
+
 Structure
 * Detect Motion
 * Capture Image
